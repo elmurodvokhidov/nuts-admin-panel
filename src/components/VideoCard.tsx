@@ -1,13 +1,14 @@
 import { useState } from "react";
 import { Card, CardContent, CardFooter } from "@/components/ui/card";
 import { Button } from "./ui/button";
-import { Edit, Trash } from "lucide-react";
+import { Trash } from "lucide-react";
 import ConfirmModal from "./ConfirmModal";
 import { Video } from "@/routes/Videos";
 import { GLOBAL_SERVER_URL } from "@/constants";
-import { reloadPage } from "@/lib/utils";
+import VideosForm from "./VideosForm";
 
-export default function VideoCard({ video }: { video: Video }) {
+export default function VideoCard({ video, fetchAllVideos }: { video: Video; fetchAllVideos: () => void; }) {
+    const [open, setOpen] = useState(false);
     const [isModalOpen, setModalOpen] = useState(false);
 
     const handleDelete = async () => {
@@ -16,7 +17,7 @@ export default function VideoCard({ video }: { video: Video }) {
                 method: "DELETE",
                 headers: { "Content-Type": "application/json" }
             });
-            if (response.ok) return reloadPage();
+            if (response.ok) return fetchAllVideos();
         } catch (error) {
             console.log(error);
         }
@@ -38,9 +39,15 @@ export default function VideoCard({ video }: { video: Video }) {
                     <h3 className="text-lg uppercase">{video.type}</h3>
                 </CardContent>
                 <CardFooter className="p-0 border-t">
-                    <Button variant="ghost" className="w-full">
-                        <Edit className="size-4 me-1" /> Tahrirlash
-                    </Button>
+                    <VideosForm
+                        video={video}
+                        isEdit={true}
+                        buttonVariant="ghost-btn"
+                        icon="edit"
+                        open={open}
+                        setOpen={setOpen}
+                        fetchAllVideos={fetchAllVideos}
+                    />
                     <Button
                         variant="ghost"
                         className="w-full text-red-500 hover:text-red-600"

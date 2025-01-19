@@ -12,7 +12,3 @@ export function encryptKey(passcode: string) {
 export function decryptKey(passcode: string) {
   return atob(passcode);
 }
-
-export function reloadPage() {
-  window.location.reload();
-}

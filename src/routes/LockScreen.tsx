@@ -18,7 +18,7 @@ import {
     InputOTPSlot,
 } from "@/components/ui/input-otp"
 import { useNavigate } from "react-router-dom"
-import onBoarding from "../assets/onboarding.svg"
+import onBoarding from "/assets/onboarding.svg"
 import { PASSCODE } from "@/constants"
 import { decryptKey, encryptKey } from "@/lib/utils"
 import { useEffect } from "react"

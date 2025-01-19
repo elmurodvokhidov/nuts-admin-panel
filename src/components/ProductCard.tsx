@@ -1,13 +1,14 @@
 import { useState } from "react";
 import { Card, CardContent, CardFooter } from "@/components/ui/card";
 import { Button } from "./ui/button";
-import { Edit, Trash } from "lucide-react";
+import { Trash } from "lucide-react";
 import ConfirmModal from "./ConfirmModal";
 import { Product } from "@/routes/Products";
-import { reloadPage } from "@/lib/utils";
 import { GLOBAL_SERVER_URL } from "@/constants";
+import ProductsForm from "./ProductsForm";
 
-export default function ProductCard({ product }: { product: Product }) {
+export default function ProductCard({ product, fetchAllProducts }: { product: Product; fetchAllProducts: () => void; }) {
+    const [open, setOpen] = useState(false);
     const [isModalOpen, setModalOpen] = useState(false);
 
     const handleDelete = async () => {
@@ -16,7 +17,7 @@ export default function ProductCard({ product }: { product: Product }) {
                 method: "DELETE",
                 headers: { "Content-Type": "application/json" }
             });
-            if (response.ok) return reloadPage();
+            if (response.ok) return fetchAllProducts();
         } catch (error) {
             console.log(error);
         }
@@ -45,9 +46,15 @@ export default function ProductCard({ product }: { product: Product }) {
                     </div>
                 </CardContent>
                 <CardFooter className="p-0 border-t">
-                    <Button variant="ghost" className="w-full">
-                        <Edit className="size-4 me-1" /> Tahrirlash
-                    </Button>
+                    <ProductsForm
+                        product={product}
+                        isEdit={true}
+                        buttonVariant="ghost-btn"
+                        icon="edit"
+                        open={open}
+                        setOpen={setOpen}
+                        fetchAllProducts={fetchAllProducts}
+                    />
                     <Button
                         variant="ghost"
                         className="w-full text-red-500 hover:text-red-600"
