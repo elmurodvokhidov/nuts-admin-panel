@@ -3,6 +3,7 @@ import { Box, Video } from "lucide-react"
 import {
     Sidebar,
     SidebarContent,
+    SidebarFooter,
     SidebarGroup,
     SidebarGroupContent,
     SidebarGroupLabel,
@@ -11,6 +12,7 @@ import {
     SidebarMenuItem,
 } from "@/components/ui/sidebar"
 import { Link } from "react-router-dom"
+import Logout from "./Logout"
 
 const items = [
     {
@@ -57,6 +59,9 @@ export function AppSidebar() {
                     </SidebarGroupContent>
                 </SidebarGroup>
             </SidebarContent>
+            <SidebarFooter>
+                <Logout />
+            </SidebarFooter>
         </Sidebar>
     )
 }

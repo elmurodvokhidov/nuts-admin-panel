@@ -90,7 +90,7 @@ export default function LockScreen() {
                         )}
                     />
 
-                    <Button type="submit" className="text-base">Tashdiqlash</Button>
+                    <Button type="submit" className="text-base">Tasdiqlash</Button>
                 </form>
             </Form>
 
