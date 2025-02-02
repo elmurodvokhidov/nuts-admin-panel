@@ -1,5 +1,3 @@
-"use client";
-
 import { Form } from "@/components/ui/form";
 import { Separator } from "@/components/ui/separator";
 import { Sheet, SheetContent, SheetFooter, SheetHeader, SheetTitle, SheetTrigger } from "@/components/ui/sheet";

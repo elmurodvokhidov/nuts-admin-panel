@@ -36,7 +36,7 @@ export default function Products() {
     }, [])
 
     return (
-        <div className="container space-y-8 pb-8">
+        <div className="container space-y-8 pb-14">
             <div className="header">
                 <h1 className="h2">Barcha mahsulotlar</h1>
                 <ProductsForm

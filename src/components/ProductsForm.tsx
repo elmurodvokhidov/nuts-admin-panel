@@ -1,5 +1,3 @@
-"use client";
-
 import CustomFormField from "@/components/CustomFormField";
 import { Form } from "@/components/ui/form";
 import { Separator } from "@/components/ui/separator";

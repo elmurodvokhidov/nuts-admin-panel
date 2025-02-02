@@ -1,10 +1,10 @@
 import { Route, Routes, useNavigate } from "react-router-dom";
 import RootLayout from "./layouts/RootLayout";
 import LockScreen from "./routes/LockScreen";
-import Dashboard from "./routes/Dashboard";
+// import Dashboard from "./routes/Dashboard";
 import { useEffect } from "react";
 import Products from "./routes/Products";
-import Videos from "./routes/Videos";
+// import Videos from "./routes/Videos";
 
 export default function App() {
   const navigate = useNavigate();
@@ -19,9 +19,10 @@ export default function App() {
     <Routes>
       <Route path="/locked" element={<LockScreen />} />
       <Route element={<RootLayout />}>
-        <Route path="/" element={<Dashboard />} />
-        <Route path="products" element={<Products />} />
-        <Route path="videos" element={<Videos />} />
+        {/* <Route path="/" element={<Dashboard />} /> */}
+        <Route path="/" element={<Products />} />
+        {/* <Route path="products" element={<Products />} /> */}
+        {/* <Route path="videos" element={<Videos />} /> */}
       </Route>
     </Routes>
   )

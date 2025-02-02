@@ -1,5 +1,3 @@
-"use client";
-
 import { Label } from "@/components/ui/label"
 import { Input } from "@/components/ui/input"
 import { FileIcon, LoaderCircle } from "lucide-react"
