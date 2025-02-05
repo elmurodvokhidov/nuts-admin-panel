@@ -1,8 +1,8 @@
 import {
     SidebarProvider,
-    // SidebarTrigger
+    SidebarTrigger
 } from "@/components/ui/sidebar"
-// import { AppSidebar } from "@/components/AppSidebar"
+import { AppSidebar } from "@/components/AppSidebar"
 import { Outlet, useNavigate } from "react-router-dom"
 import { useEffect } from "react";
 import { decryptKey } from "@/lib/utils";
@@ -21,9 +21,9 @@ export default function RootLayout() {
 
     return (
         <SidebarProvider>
-            {/* <AppSidebar /> */}
-            <main className="w-full mt-4">
-                {/* <SidebarTrigger /> */}
+            <AppSidebar />
+            <main className="w-full">
+                <SidebarTrigger />
                 <Outlet />
             </main>
         </SidebarProvider>

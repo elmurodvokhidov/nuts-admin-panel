@@ -4,7 +4,7 @@ import LockScreen from "./routes/LockScreen";
 // import Dashboard from "./routes/Dashboard";
 import { useEffect } from "react";
 import Products from "./routes/Products";
-// import Videos from "./routes/Videos";
+import Videos from "./routes/Videos";
 
 export default function App() {
   const navigate = useNavigate();
@@ -22,7 +22,7 @@ export default function App() {
         {/* <Route path="/" element={<Dashboard />} /> */}
         <Route path="/" element={<Products />} />
         {/* <Route path="products" element={<Products />} /> */}
-        {/* <Route path="videos" element={<Videos />} /> */}
+        <Route path="videos" element={<Videos />} />
       </Route>
     </Routes>
   )
