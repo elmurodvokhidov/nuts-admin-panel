@@ -9,4 +9,4 @@ export enum FormFieldType {
     SELECT = 'select',
 };
 
-export const VIDEO_TYPES = ["home", "products", "about_top", "about_bottom"];
+export const VIDEO_TYPES = ["home", "about"];
