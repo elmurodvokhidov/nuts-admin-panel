@@ -34,6 +34,7 @@ export default function ProductsForm({
 }: ProductsFormProps) {
     const [isLoading, setIsLoading] = useState(false);
     const { toast } = useToast();
+    const [selectedImage, setSelectedImage] = useState<File | null>(null);
 
     const form = useForm<z.infer<typeof ProductsFormValidation>>({
         resolver: zodResolver(ProductsFormValidation),
@@ -42,47 +43,50 @@ export default function ProductsForm({
             description: product ? product.description : "",
             imgUrl: product ? product.imgUrl : "",
         },
-    })
+    });
 
     const onSubmit = async (values: z.infer<typeof ProductsFormValidation>) => {
         setIsLoading(true);
         try {
-            if (!isEdit && !product) {
-                const response = await fetch(`${GLOBAL_SERVER_URL}/products`, {
+            let imageUrl = "";
+            if (selectedImage) {
+                const formData = new FormData();
+                formData.append("image", selectedImage);
+
+                const imageResponse = await fetch(`${GLOBAL_SERVER_URL}/upload/image`, {
                     method: "POST",
-                    headers: { "Content-Type": "application/json" },
-                    body: JSON.stringify(values),
+                    body: formData,
                 });
 
-                if (response.ok) {
-                    fetchAllProducts();
-                    setOpen && setOpen(false);
-                    form.reset();
-                } else {
-                    toast({ title: "Nimadir xato, qayta urinib ko'ring" });
+                if (!imageResponse.ok) throw new Error("Rasm yuklashda xatolik yuz berdi!");
+                imageUrl = await imageResponse.json();
+            }
+
+            const productData = { ...values, imgUrl: imageUrl };
+
+            const response = await fetch(
+                isEdit && product ? `${GLOBAL_SERVER_URL}/products/${product._id}` : `${GLOBAL_SERVER_URL}/products`,
+                {
+                    method: isEdit ? "PUT" : "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify(productData),
                 }
+            );
+
+            if (response.ok) {
+                fetchAllProducts();
+                setOpen && setOpen(false);
+                form.reset();
             } else {
-                const response = await fetch(`${GLOBAL_SERVER_URL}/products/${product?._id}`, {
-                    method: "PUT",
-                    headers: { "Content-Type": "application/json" },
-                    body: JSON.stringify(values),
-                });
-
-                if (response.ok) {
-                    fetchAllProducts();
-                    setOpen && setOpen(false);
-                    form.reset();
-                } else {
-                    toast({ title: "Nimadir xato, qayta urinib ko'ring" });
-                }
+                toast({ title: "Nimadir xato, qayta urinib ko'ring", variant: "destructive" });
             }
         } catch (error) {
-            console.log(error);
-            toast({ title: "Mahsulot qo'shishda xatolik." });
+            console.error(error);
+            toast({ title: "Mahsulot qo'shishda xatolik.", variant: "destructive" });
         } finally {
             setIsLoading(false);
         }
-    }
+    };
 
     return (
         <Sheet open={open} onOpenChange={setOpen}>
@@ -118,10 +122,7 @@ export default function ProductsForm({
                         />
 
                         <div>
-                            <ImageUploader onUpload={(url) => {
-                                form.setValue("imgUrl", url);
-                                form.trigger("imgUrl");
-                            }} />
+                            <ImageUploader onSelect={(file) => setSelectedImage(file)} />
 
                             {form.formState.errors.imgUrl && (
                                 <p className="text-red-500 text-[0.8rem] font-medium text-destructive mt-2">

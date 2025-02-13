@@ -34,6 +34,7 @@ export default function VideosForm({
     fetchAllVideos,
 }: VideosFormProps) {
     const [isLoading, setIsLoading] = useState(false);
+    const [selectedFile, setSelectedFile] = useState<File | null>(null);
     const { toast } = useToast();
 
     const form = useForm<z.infer<typeof VideosFormValidation>>({
@@ -42,51 +43,76 @@ export default function VideosForm({
             type: video ? video.type : "",
             videoUrl: video ? video.videoUrl : "",
         },
-    })
+    });
+
+    const uploadVideo = async (file: File): Promise<string | null> => {
+        const formData = new FormData();
+        formData.append("video", file);
+
+        try {
+            const response = await fetch(`${GLOBAL_SERVER_URL}/upload/video`, {
+                method: "POST",
+                body: formData,
+            });
+
+            if (!response.ok) throw new Error("Video upload failed!");
+
+            const data = await response.json();
+            return data; // Serverdan kelgan URL qaytariladi
+        } catch (error) {
+            console.error("Video yuklashda xatolik:", error);
+            toast({ title: "Video yuklashda xatolik.", variant: "destructive" });
+            return null;
+        }
+    };
 
     const onSubmit = async (values: z.infer<typeof VideosFormValidation>) => {
         setIsLoading(true);
+
         try {
-            if (!isEdit && !video) {
-                const response = await fetch(`${GLOBAL_SERVER_URL}/videos`, {
-                    method: "POST",
-                    headers: { "Content-Type": "application/json" },
-                    body: JSON.stringify(values),
-                });
+            let videoUrl = values.videoUrl;
 
-                const data = await response.json();
-
-                if (response.ok) {
-                    fetchAllVideos();
-                    setOpen && setOpen(false);
-                    form.reset();
-                } else if (data.error) {
-                    toast({ title: data.error, variant: "destructive" });
+            // Fayl yuklash
+            if (selectedFile) {
+                const uploadedUrl = await uploadVideo(selectedFile);
+                if (uploadedUrl) {
+                    videoUrl = uploadedUrl;
                 } else {
-                    toast({ title: "Nimadir xato, qayta urinib ko'ring", variant: "destructive" });
-                }
-            } else {
-                const response = await fetch(`${GLOBAL_SERVER_URL}/videos/${video?._id}`, {
-                    method: "PUT",
-                    headers: { "Content-Type": "application/json" },
-                    body: JSON.stringify(values),
-                });
-
-                if (response.ok) {
-                    fetchAllVideos();
-                    setOpen && setOpen(false);
-                    form.reset();
-                } else {
-                    toast({ title: "Nimadir xato, qayta urinib ko'ring", variant: "destructive" });
+                    throw new Error("Video yuklashda xatolik yuz berdi.");
                 }
             }
+
+            // Ma'lumotlarni serverga yuborish
+            const endpoint = isEdit && video ? `/videos/${video._id}` : "/videos";
+            const method = isEdit ? "PUT" : "POST";
+
+            const response = await fetch(`${GLOBAL_SERVER_URL}${endpoint}`, {
+                method,
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ ...values, videoUrl }),
+            });
+
+            const data = await response.json();
+
+            if (response.ok) {
+                fetchAllVideos();
+                setOpen && setOpen(false);
+                form.reset();
+            } else if (data.error) {
+                toast({ title: data.error, variant: "destructive" });
+            } else {
+                toast({
+                    title: "Nimadir xato, qayta urinib ko'ring",
+                    variant: "destructive",
+                });
+            }
         } catch (error) {
-            console.log(error);
+            console.error(error);
             toast({ title: "Video qo'shishda xatolik.", variant: "destructive" });
         } finally {
             setIsLoading(false);
         }
-    }
+    };
 
     return (
         <Sheet open={open} onOpenChange={setOpen}>
@@ -96,9 +122,7 @@ export default function VideosForm({
             </SheetTrigger>
             <SheetContent className="!w-full sm:!max-w-md h-screen px-3 overflow-y-auto">
                 <SheetHeader>
-                    <SheetTitle>
-                        Video ma'lumotlari
-                    </SheetTitle>
+                    <SheetTitle>Video ma'lumotlari</SheetTitle>
                 </SheetHeader>
 
                 <Separator className="my-4 bg-light-200/50" />
@@ -122,10 +146,7 @@ export default function VideosForm({
                         </CustomFormField>
 
                         <div>
-                            <VideoUploader onUpload={(url) => {
-                                form.setValue("videoUrl", url);
-                                form.trigger("videoUrl");
-                            }} />
+                            <VideoUploader onFileSelect={(file) => setSelectedFile(file)} />
 
                             {form.formState.errors.videoUrl && (
                                 <p className="text-red-500 text-[0.8rem] font-medium text-destructive mt-2">
@@ -136,7 +157,11 @@ export default function VideosForm({
 
                         <SheetFooter>
                             <Button type="submit" disabled={isLoading}>
-                                {isLoading ? "Yuklanmoqda..." : !isEdit ? "Qo'shish" : "Tahrirlash"}
+                                {isLoading
+                                    ? "Yuklanmoqda..."
+                                    : !isEdit
+                                        ? "Qo'shish"
+                                        : "Tahrirlash"}
                             </Button>
                         </SheetFooter>
                     </form>
