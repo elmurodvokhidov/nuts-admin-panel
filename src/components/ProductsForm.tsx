@@ -48,7 +48,7 @@ export default function ProductsForm({
     const onSubmit = async (values: z.infer<typeof ProductsFormValidation>) => {
         setIsLoading(true);
         try {
-            let imageUrl = "";
+            let imageUrl = product && !selectedImage ? product.imgUrl : "";
             if (selectedImage) {
                 const formData = new FormData();
                 formData.append("image", selectedImage);
@@ -122,7 +122,11 @@ export default function ProductsForm({
                         />
 
                         <div>
-                            <ImageUploader onSelect={(file) => setSelectedImage(file)} />
+                            <ImageUploader onSelect={(file) => {
+                                setSelectedImage(file);
+                                form.setValue("imgUrl", file.name);
+                                form.trigger("imgUrl");
+                            }} />
 
                             {form.formState.errors.imgUrl && (
                                 <p className="text-red-500 text-[0.8rem] font-medium text-destructive mt-2">

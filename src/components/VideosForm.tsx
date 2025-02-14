@@ -58,7 +58,7 @@ export default function VideosForm({
             if (!response.ok) throw new Error("Video upload failed!");
 
             const data = await response.json();
-            return data; // Serverdan kelgan URL qaytariladi
+            return data;
         } catch (error) {
             console.error("Video yuklashda xatolik:", error);
             toast({ title: "Video yuklashda xatolik.", variant: "destructive" });
@@ -146,7 +146,11 @@ export default function VideosForm({
                         </CustomFormField>
 
                         <div>
-                            <VideoUploader onFileSelect={(file) => setSelectedFile(file)} />
+                            <VideoUploader onFileSelect={(file) => {
+                                setSelectedFile(file);
+                                form.setValue("videoUrl", file.name);
+                                form.trigger("videoUrl");
+                            }} />
 
                             {form.formState.errors.videoUrl && (
                                 <p className="text-red-500 text-[0.8rem] font-medium text-destructive mt-2">

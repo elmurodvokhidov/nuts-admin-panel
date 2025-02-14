@@ -69,15 +69,15 @@ export default function LockScreen() {
                                 <FormControl>
                                     <InputOTP maxLength={6} {...field}>
                                         <InputOTPGroup>
-                                            <InputOTPSlot index={0} className="text-5xl size-16" />
-                                            <InputOTPSlot index={1} className="text-5xl size-16" />
-                                            <InputOTPSlot index={2} className="text-5xl size-16" />
+                                            <InputOTPSlot index={0} className="text-2xl md:text-5xl size-12 md:size-16" />
+                                            <InputOTPSlot index={1} className="text-2xl md:text-5xl size-12 md:size-16" />
+                                            <InputOTPSlot index={2} className="text-2xl md:text-5xl size-12 md:size-16" />
                                         </InputOTPGroup>
                                         <InputOTPSeparator />
                                         <InputOTPGroup>
-                                            <InputOTPSlot index={3} className="text-5xl size-16" />
-                                            <InputOTPSlot index={4} className="text-5xl size-16" />
-                                            <InputOTPSlot index={5} className="text-5xl size-16" />
+                                            <InputOTPSlot index={3} className="text-2xl md:text-5xl size-12 md:size-16" />
+                                            <InputOTPSlot index={4} className="text-2xl md:text-5xl size-12 md:size-16" />
+                                            <InputOTPSlot index={5} className="text-2xl md:text-5xl size-12 md:size-16" />
                                         </InputOTPGroup>
                                     </InputOTP>
                                 </FormControl>

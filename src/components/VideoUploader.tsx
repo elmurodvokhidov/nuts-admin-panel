@@ -3,11 +3,7 @@ import { Input } from "@/components/ui/input";
 import { FileIcon } from "lucide-react";
 import { useState } from "react";
 
-export default function VideoUploader({
-    onFileSelect,
-}: {
-    onFileSelect: (file: File | null) => void;
-}) {
+export default function VideoUploader({ onFileSelect }: { onFileSelect: (file: File) => void; }) {
     const [selectedFile, setSelectedFile] = useState<File | null>(null);
 
     const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -15,9 +11,6 @@ export default function VideoUploader({
             const file = e.target.files[0];
             setSelectedFile(file);
             onFileSelect(file);
-        } else {
-            setSelectedFile(null);
-            onFileSelect(null);
         }
     };
 
