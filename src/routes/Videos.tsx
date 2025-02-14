@@ -48,7 +48,7 @@ export default function Videos() {
                 />
             </div>
 
-            <div className="flex flex-wrap gap-20 justify-start">
+            <div className="flex flex-wrap gap-20 md:justify-start justify-center">
                 {isLoading ? "Yuklanmoqda..." : (
                     videos.length > 0 ?
                         videos.map(video => <VideoCard video={video} key={video._id} fetchAllVideos={fetchAllVideos} />)

@@ -49,7 +49,7 @@ export default function Products() {
                 />
             </div>
 
-            <div className="flex flex-wrap gap-20 justify-start">
+            <div className="flex flex-wrap gap-20 md:justify-start justify-center">
                 {isLoading ? "Yuklanmoqda..." : (
                     products.length > 0 ?
                         products.map(product => <ProductCard product={product} key={product._id} fetchAllProducts={fetchAllProducts} />)

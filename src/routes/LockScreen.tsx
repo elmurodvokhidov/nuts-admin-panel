@@ -18,7 +18,6 @@ import {
     InputOTPSlot,
 } from "@/components/ui/input-otp"
 import { useNavigate } from "react-router-dom"
-import onBoarding from "/assets/onboarding.svg"
 import { PASSCODE } from "@/constants"
 import { decryptKey, encryptKey } from "@/lib/utils"
 import { useEffect } from "react"
@@ -93,14 +92,6 @@ export default function LockScreen() {
                     <Button type="submit" className="text-base">Tasdiqlash</Button>
                 </form>
             </Form>
-
-            <img
-                src={onBoarding}
-                width={1000}
-                height={1000}
-                alt="onboarding"
-                className="hidden h-full object-cover md:block max-w-[50%]"
-            />
         </div>
     )
 }
