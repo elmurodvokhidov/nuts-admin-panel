@@ -33,8 +33,9 @@ export default function ProductsForm({
     fetchAllProducts,
 }: ProductsFormProps) {
     const [isLoading, setIsLoading] = useState(false);
-    const { toast } = useToast();
+    const [progress, setProgress] = useState(0);
     const [selectedImage, setSelectedImage] = useState<File | null>(null);
+    const { toast } = useToast();
 
     const form = useForm<z.infer<typeof ProductsFormValidation>>({
         resolver: zodResolver(ProductsFormValidation),
@@ -45,21 +46,54 @@ export default function ProductsForm({
         },
     });
 
+    const uploadImage = async (file: File, onProgress: (progress: number) => void): Promise<string | null> => {
+        return new Promise((resolve, reject) => {
+            const formData = new FormData();
+            formData.append("image", file);
+
+            const xhr = new XMLHttpRequest();
+
+            xhr.open("POST", `${GLOBAL_SERVER_URL}/upload/image`, true);
+
+            xhr.upload.onprogress = (event) => {
+                if (event.lengthComputable) {
+                    const percentCompleted = Math.round((event.loaded * 100) / event.total);
+                    onProgress(percentCompleted);
+                }
+            };
+
+            xhr.onload = () => {
+                if (xhr.status === 201) {
+                    try {
+                        const response = JSON.parse(xhr.responseText);
+                        resolve(response);
+                    } catch (error) {
+                        reject(new Error("JSON parse error"));
+                    }
+                } else {
+                    reject(new Error("Image upload failed!"));
+                }
+            };
+
+            xhr.onerror = () => reject(new Error("Network error during image upload"));
+            xhr.send(formData);
+        });
+    };
+
     const onSubmit = async (values: z.infer<typeof ProductsFormValidation>) => {
         setIsLoading(true);
+        setProgress(0);
+
         try {
             let imageUrl = product && !selectedImage ? product.imgUrl : "";
+
             if (selectedImage) {
-                const formData = new FormData();
-                formData.append("image", selectedImage);
-
-                const imageResponse = await fetch(`${GLOBAL_SERVER_URL}/upload/image`, {
-                    method: "POST",
-                    body: formData,
-                });
-
-                if (!imageResponse.ok) throw new Error("Rasm yuklashda xatolik yuz berdi!");
-                imageUrl = await imageResponse.json();
+                const uploadedUrl = await uploadImage(selectedImage, setProgress);
+                if (uploadedUrl) {
+                    imageUrl = uploadedUrl;
+                } else {
+                    throw new Error("Rasm yuklashda xatolik yuz berdi.");
+                }
             }
 
             const productData = { ...values, imgUrl: imageUrl };
@@ -77,6 +111,7 @@ export default function ProductsForm({
                 fetchAllProducts();
                 setOpen && setOpen(false);
                 form.reset();
+                setProgress(0);
             } else {
                 toast({ title: "Nimadir xato, qayta urinib ko'ring", variant: "destructive" });
             }
@@ -87,6 +122,7 @@ export default function ProductsForm({
             setIsLoading(false);
         }
     };
+
 
     return (
         <Sheet open={open} onOpenChange={setOpen}>
@@ -127,6 +163,17 @@ export default function ProductsForm({
                                 form.setValue("imgUrl", file.name);
                                 form.trigger("imgUrl");
                             }} />
+
+                            {progress !== 0 && (
+                                <div className="mt-2 w-full bg-gray-200 rounded-full">
+                                    <div
+                                        className="bg-blue-500 text-xs leading-none py-1 text-center text-white rounded-full"
+                                        style={{ width: `${progress}%` }}
+                                    >
+                                        <span>{progress}%</span>
+                                    </div>
+                                </div>
+                            )}
 
                             {form.formState.errors.imgUrl && (
                                 <p className="text-red-500 text-[0.8rem] font-medium text-destructive mt-2">

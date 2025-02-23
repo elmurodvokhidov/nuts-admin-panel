@@ -35,6 +35,7 @@ export default function VideosForm({
 }: VideosFormProps) {
     const [isLoading, setIsLoading] = useState(false);
     const [selectedFile, setSelectedFile] = useState<File | null>(null);
+    const [progress, setProgress] = useState(0);
     const { toast } = useToast();
 
     const form = useForm<z.infer<typeof VideosFormValidation>>({
@@ -45,36 +46,49 @@ export default function VideosForm({
         },
     });
 
-    const uploadVideo = async (file: File): Promise<string | null> => {
-        const formData = new FormData();
-        formData.append("video", file);
+    const uploadVideo = async (file: File, onProgress: (progress: number) => void): Promise<string | null> => {
+        return new Promise((resolve, reject) => {
+            const formData = new FormData();
+            formData.append("video", file);
 
-        try {
-            const response = await fetch(`${GLOBAL_SERVER_URL}/upload/video`, {
-                method: "POST",
-                body: formData,
-            });
+            const xhr = new XMLHttpRequest();
 
-            if (!response.ok) throw new Error("Video upload failed!");
+            xhr.open("POST", `${GLOBAL_SERVER_URL}/upload/video`, true);
 
-            const data = await response.json();
-            return data;
-        } catch (error) {
-            console.error("Video yuklashda xatolik:", error);
-            toast({ title: "Video yuklashda xatolik.", variant: "destructive" });
-            return null;
-        }
+            xhr.upload.onprogress = (event) => {
+                if (event.lengthComputable) {
+                    const percentCompleted = Math.round((event.loaded * 100) / event.total);
+                    onProgress(percentCompleted);
+                }
+            };
+
+            xhr.onload = () => {
+                if (xhr.status === 201) {
+                    try {
+                        const response = JSON.parse(xhr.responseText);
+                        resolve(response);
+                    } catch (error) {
+                        reject(new Error("JSON parse error"));
+                    }
+                } else {
+                    reject(new Error("Video upload failed!"));
+                }
+            };
+
+            xhr.onerror = () => reject(new Error("Network error during video upload"));
+            xhr.send(formData);
+        });
     };
 
     const onSubmit = async (values: z.infer<typeof VideosFormValidation>) => {
         setIsLoading(true);
+        setProgress(0);
 
         try {
             let videoUrl = values.videoUrl;
 
-            // Fayl yuklash
             if (selectedFile) {
-                const uploadedUrl = await uploadVideo(selectedFile);
+                const uploadedUrl = await uploadVideo(selectedFile, setProgress);
                 if (uploadedUrl) {
                     videoUrl = uploadedUrl;
                 } else {
@@ -82,7 +96,6 @@ export default function VideosForm({
                 }
             }
 
-            // Ma'lumotlarni serverga yuborish
             const endpoint = isEdit && video ? `/videos/${video._id}` : "/videos";
             const method = isEdit ? "PUT" : "POST";
 
@@ -98,13 +111,11 @@ export default function VideosForm({
                 fetchAllVideos();
                 setOpen && setOpen(false);
                 form.reset();
+                setProgress(0);
             } else if (data.error) {
                 toast({ title: data.error, variant: "destructive" });
             } else {
-                toast({
-                    title: "Nimadir xato, qayta urinib ko'ring",
-                    variant: "destructive",
-                });
+                toast({ title: "Nimadir xato, qayta urinib ko'ring", variant: "destructive" });
             }
         } catch (error) {
             console.error(error);
@@ -148,9 +159,21 @@ export default function VideosForm({
                         <div>
                             <VideoUploader onFileSelect={(file) => {
                                 setSelectedFile(file);
+                                setProgress(0);
                                 form.setValue("videoUrl", file.name);
                                 form.trigger("videoUrl");
                             }} />
+
+                            {progress !== 0 && (
+                                <div className="mt-2 w-full bg-gray-200 rounded-full">
+                                    <div
+                                        className="bg-blue-500 text-xs leading-none py-1 text-center text-white rounded-full"
+                                        style={{ width: `${progress}%` }}
+                                    >
+                                        <span>{progress}%</span>
+                                    </div>
+                                </div>
+                            )}
 
                             {form.formState.errors.videoUrl && (
                                 <p className="text-red-500 text-[0.8rem] font-medium text-destructive mt-2">
